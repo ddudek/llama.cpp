@@ -4704,13 +4704,25 @@ int main(int argc, char ** argv) {
             return;
         }
 
+        std::string instruction;
+        if (body.count("instruction") == 1) {
+            json instruction_json = body.at("instruction");
+            if (!instruction_json.is_string()) {
+                res_error(res, format_error_response("\"instruction\" must be a string", ERROR_TYPE_INVALID_REQUEST));
+                return;
+            }
+            instruction = instruction_json;
+        } else {
+            instruction = "Given a web search query, retrieve relevant passages that answer the query";
+        }
+
         // create and queue the task
         json responses = json::array();
         bool error = false;
         std::unordered_set<int> task_ids;
         {
             std::vector<server_task> tasks;
-            auto inputs = tokenize_rerank(ctx_server.model, query, documents);
+            auto inputs = tokenize_rerank(ctx_server.model, query, instruction, documents);
             tasks.reserve(documents.size());
             for (size_t i = 0; i < inputs.size(); i++) {
                 server_task task   = server_task(SERVER_TASK_TYPE_RERANK);

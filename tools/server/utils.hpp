@@ -263,7 +263,7 @@ static size_t validate_utf8(const std::string& text) {
 // format and tokenize rerank task:
 // - using SEP token: [BOS]query[EOS][SEP]doc[EOS]
 // - using prompt:    <rerank_prefix>query<rerank_suffix>doc
-static std::vector<llama_tokens> tokenize_rerank(const struct llama_model * model, const std::string & query, const std::vector<std::string> & documents) {
+static std::vector<llama_tokens> tokenize_rerank(const struct llama_model * model, const std::string & query, const std::string & instruction, const std::vector<std::string> & documents) {
     const llama_vocab * vocab = llama_model_get_vocab(model);
     std::vector<llama_tokens> result;
 
@@ -298,6 +298,7 @@ static std::vector<llama_tokens> tokenize_rerank(const struct llama_model * mode
             // TODO: may not be efficient to call string_replace_all twice
             string_replace_all(prompt, "{query}",    query);
             string_replace_all(prompt, "{document}", doc);
+            string_replace_all(prompt, "{instruction}", instruction);
             llama_tokens tok = common_tokenize(vocab, prompt, true, false);
             result.push_back(std::move(tok));
         }
